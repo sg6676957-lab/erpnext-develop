@@ -5,3 +5,5 @@
 !railway/resources/**
 !railway/railway.toml
 !railway/README-RAILWAY.md
+!render/**
+!render.yaml

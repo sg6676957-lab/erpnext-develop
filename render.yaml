@@ -1,0 +1,86 @@
+services:
+  - type: web
+    name: erpnext-app
+    runtime: docker
+    dockerfilePath: railway/Dockerfile
+    dockerContext: .
+    dockerCommand: /usr/local/bin/render-start.sh
+    envVars:
+      - key: APPS_JSON_BASE64
+        value: "WwogewogICJ1cmwiOiAiaHR0cHM6Ly9naXRodWIuY29tL3NnNjY3Njk1Ny1sYWIvZXJwbmV4dC1kZXZlbG9wIiwKICAiYnJhbmNoIjogIm1haW4iCiB9Cl0K"
+      - key: FRAPPE_BRANCH
+        value: version-16
+      - key: FRAPPE_PATH
+        value: https://github.com/frappe/frappe
+      - key: PYTHON_VERSION
+        value: 3.14.2
+      - key: NODE_VERSION
+        value: 24.13.0
+      - key: ERPNext_REPO_NAME
+        value: erpnext-develop
+      - key: HRMS_SUBDIR
+        value: hrms-develop/hrms
+      - key: SITE_NAME
+        sync: false
+      - key: ADMIN_PW
+        sync: false
+      - key: DB_HOST
+        fromService:
+          name: erpnext-mysql
+          type: pserv
+          property: host
+      - key: DB_PORT
+        fromService:
+          name: erpnext-mysql
+          type: pserv
+          property: port
+      - key: DB_ROOT_USER
+        value: root
+      - key: DB_ROOT_PW
+        fromService:
+          name: erpnext-mysql
+          type: pserv
+          envVarKey: MYSQL_ROOT_PASSWORD
+      - key: FRAPPE_REDIS_CACHE
+        fromService:
+          name: erpnext-redis-cache
+          type: keyvalue
+          property: connectionString
+      - key: FRAPPE_REDIS_QUEUE
+        fromService:
+          name: erpnext-redis-queue
+          type: keyvalue
+          property: connectionString
+      - key: FRAPPE_REDIS_SOCKETIO
+        fromService:
+          name: erpnext-redis-queue
+          type: keyvalue
+          property: connectionString
+      - key: SOCKETIO_PORT
+        value: "9000"
+
+  - type: pserv
+    name: erpnext-mysql
+    runtime: image
+    image: mysql:8.0
+    disk:
+      name: mysql-data
+      mountPath: /var/lib/mysql
+      sizeGB: 10
+    envVars:
+      - key: MYSQL_ROOT_PASSWORD
+        sync: false
+      - key: MYSQL_DATABASE
+        value: erpnext
+      - key: MYSQL_USER
+        value: erpnext
+      - key: MYSQL_PASSWORD
+        sync: false
+
+  - type: keyvalue
+    name: erpnext-redis-cache
+    ipAllowList: []
+
+  - type: keyvalue
+    name: erpnext-redis-queue
+    ipAllowList: []

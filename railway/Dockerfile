@@ -120,10 +120,14 @@ RUN export APP_INSTALL_ARGS="--apps_path=/opt/frappe/apps.json" \
     && if [ -d "/home/frappe/frappe-bench/apps/${ERPNext_REPO_NAME}/${HRMS_SUBDIR}" ]; then \
         bench get-app "/home/frappe/frappe-bench/apps/${ERPNext_REPO_NAME}/${HRMS_SUBDIR}"; \
     fi \
+    && /home/frappe/frappe-bench/env/bin/pip install gunicorn \
     && echo "{}" > sites/common_site_config.json \
     && find apps -mindepth 1 -path "*/.git" | xargs rm -fr
 
 FROM base AS backend
+
+COPY render/start.sh /usr/local/bin/render-start.sh
+RUN chmod 755 /usr/local/bin/render-start.sh
 
 USER frappe
 
