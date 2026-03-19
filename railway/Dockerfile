@@ -108,6 +108,8 @@ ARG FRAPPE_BRANCH=version-16
 ARG FRAPPE_PATH=https://github.com/frappe/frappe
 ARG ERPNext_REPO_NAME=erpnext-develop
 ARG HRMS_SUBDIR=hrms-develop/hrms
+ARG NODE_MAX_OLD_SPACE_SIZE=1024
+ARG ESBUILD_WORKER_COUNT=1
 
 RUN export APP_INSTALL_ARGS="--apps_path=/opt/frappe/apps.json" \
     && bench init ${APP_INSTALL_ARGS} \
@@ -122,6 +124,9 @@ RUN export APP_INSTALL_ARGS="--apps_path=/opt/frappe/apps.json" \
     && if [ -d "/home/frappe/frappe-bench/apps/${ERPNext_REPO_NAME}/${HRMS_SUBDIR}" ]; then \
         bench get-app "/home/frappe/frappe-bench/apps/${ERPNext_REPO_NAME}/${HRMS_SUBDIR}"; \
     fi \
+    && export NODE_OPTIONS="--max_old_space_size=${NODE_MAX_OLD_SPACE_SIZE}" \
+    && export ESBUILD_WORKER_COUNT=${ESBUILD_WORKER_COUNT} \
+    && bench build --production \
     && /home/frappe/frappe-bench/env/bin/pip install gunicorn \
     && echo "{}" > sites/common_site_config.json \
     && find apps -mindepth 1 -path "*/.git" | xargs rm -fr

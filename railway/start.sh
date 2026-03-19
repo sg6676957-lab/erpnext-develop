@@ -23,8 +23,6 @@ DB_ROOT_USER="${DB_ROOT_USER:-root}"
 DB_ROOT_PW="${DB_ROOT_PW:-${MYSQL_ROOT_PASSWORD:-}}"
 SOCKETIO_PORT="${SOCKETIO_PORT:-9000}"
 GUNICORN_PORT="${GUNICORN_PORT:-8000}"
-NODE_MAX_OLD_SPACE_SIZE="${NODE_MAX_OLD_SPACE_SIZE:-512}"
-ESBUILD_WORKER_COUNT="${ESBUILD_WORKER_COUNT:-1}"
 FRAPPE_REDIS_CACHE="${FRAPPE_REDIS_CACHE:-redis://127.0.0.1:6379}"
 FRAPPE_REDIS_QUEUE="${FRAPPE_REDIS_QUEUE:-redis://127.0.0.1:6379}"
 FRAPPE_REDIS_SOCKETIO="${FRAPPE_REDIS_SOCKETIO:-${FRAPPE_REDIS_QUEUE}}"
@@ -58,16 +56,11 @@ if [ ! -f "${BENCH_DIR}/sites/${SITE_NAME}/site_config.json" ]; then
   ${BENCH_BIN} --site "${SITE_NAME}" migrate
 fi
 
-export NODE_OPTIONS="--max_old_space_size=${NODE_MAX_OLD_SPACE_SIZE}"
-export ESBUILD_WORKER_COUNT
-
 mkdir -p "${BENCH_DIR}/sites/assets"
-rm -rf "${BENCH_DIR}/sites/assets/erpnext" "${BENCH_DIR}/sites/assets/frappe"
-${BENCH_BIN} build --production
 if ! compgen -G "${BENCH_DIR}/sites/assets/erpnext/dist/css/erpnext-web.bundle*.css" > /dev/null \
   || ! compgen -G "${BENCH_DIR}/sites/assets/frappe/dist/css/login.bundle*.css" > /dev/null \
   || ! compgen -G "${BENCH_DIR}/sites/assets/frappe/dist/js/frappe-web.bundle*.js" > /dev/null; then
-  echo "Assets build incomplete; expected ERPNext and Frappe bundles not found." >&2
+  echo "Missing built assets. Rebuild the image to generate assets in the build stage." >&2
   exit 1
 fi
 
