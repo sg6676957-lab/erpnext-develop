@@ -1,4 +1,4 @@
-﻿#!/bin/bash
+#!/bin/bash
 # Set variables that do not exist
 if [[ -z "$BACKEND" ]]; then
     echo "BACKEND defaulting to 0.0.0.0:8000"
