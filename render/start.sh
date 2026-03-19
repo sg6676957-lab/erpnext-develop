@@ -56,10 +56,14 @@ if [ ! -f "${BENCH_DIR}/sites/${SITE_NAME}/site_config.json" ]; then
   ${BENCH_BIN} --site "${SITE_NAME}" migrate
 fi
 
-if [ ! -f "${BENCH_DIR}/sites/assets/assets.json" ] \
-  || ! compgen -G "${BENCH_DIR}/sites/assets/erpnext/dist/css/erpnext-web.bundle*.css" > /dev/null \
+mkdir -p "${BENCH_DIR}/sites/assets"
+rm -rf "${BENCH_DIR}/sites/assets/erpnext" "${BENCH_DIR}/sites/assets/frappe"
+${BENCH_BIN} build --production
+if ! compgen -G "${BENCH_DIR}/sites/assets/erpnext/dist/css/erpnext-web.bundle*.css" > /dev/null \
+  || ! compgen -G "${BENCH_DIR}/sites/assets/frappe/dist/css/login.bundle*.css" > /dev/null \
   || ! compgen -G "${BENCH_DIR}/sites/assets/frappe/dist/js/frappe-web.bundle*.js" > /dev/null; then
-  ${BENCH_BIN} build --production
+  echo "Assets build incomplete; expected ERPNext and Frappe bundles not found." >&2
+  exit 1
 fi
 
 node "${BENCH_DIR}/apps/frappe/socketio.js" &
