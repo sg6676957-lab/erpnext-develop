@@ -32,6 +32,7 @@ ${BENCH_BIN} set-config -g redis_cache "${FRAPPE_REDIS_CACHE}"
 ${BENCH_BIN} set-config -g redis_queue "${FRAPPE_REDIS_QUEUE}"
 ${BENCH_BIN} set-config -g redis_socketio "${FRAPPE_REDIS_SOCKETIO}"
 ${BENCH_BIN} set-config -g socketio_port "${SOCKETIO_PORT}"
+${BENCH_BIN} set-config -g default_site "${SITE_NAME}"
 
 if [ ! -f "${BENCH_DIR}/sites/${SITE_NAME}/site_config.json" ]; then
   if [ -z "${DB_ROOT_PW}" ]; then
