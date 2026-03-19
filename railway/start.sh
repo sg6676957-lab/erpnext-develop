@@ -20,7 +20,7 @@ ADMIN_PW="${ADMIN_PW:-admin}"
 DB_HOST="${DB_HOST:-127.0.0.1}"
 DB_PORT="${DB_PORT:-3306}"
 DB_ROOT_USER="${DB_ROOT_USER:-root}"
-DB_ROOT_PW="${DB_ROOT_PW:-}"
+DB_ROOT_PW="${DB_ROOT_PW:-${MYSQL_ROOT_PASSWORD:-}}"
 SOCKETIO_PORT="${SOCKETIO_PORT:-9000}"
 FRAPPE_REDIS_CACHE="${FRAPPE_REDIS_CACHE:-redis://127.0.0.1:6379}"
 FRAPPE_REDIS_QUEUE="${FRAPPE_REDIS_QUEUE:-redis://127.0.0.1:6379}"
@@ -34,13 +34,17 @@ ${BENCH_BIN} set-config -g redis_socketio "${FRAPPE_REDIS_SOCKETIO}"
 ${BENCH_BIN} set-config -g socketio_port "${SOCKETIO_PORT}"
 
 if [ ! -f "${BENCH_DIR}/sites/${SITE_NAME}/site_config.json" ]; then
+  if [ -z "${DB_ROOT_PW}" ]; then
+    echo "DB_ROOT_PW (or MYSQL_ROOT_PASSWORD) is required to create the site." >&2
+    exit 1
+  fi
   ${BENCH_BIN} new-site "${SITE_NAME}" \
     --admin-password "${ADMIN_PW}" \
     --db-root-username "${DB_ROOT_USER}" \
     --db-root-password "${DB_ROOT_PW}" \
     --db-host "${DB_HOST}" \
     --db-port "${DB_PORT}" \
-    --no-mariadb-socket \
+    --mariadb-user-host-login-scope "%" \
     --install-app erpnext
 
   if [ -d "${BENCH_DIR}/apps/hrms" ]; then
