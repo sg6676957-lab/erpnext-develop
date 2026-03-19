@@ -56,7 +56,9 @@ if [ ! -f "${BENCH_DIR}/sites/${SITE_NAME}/site_config.json" ]; then
   ${BENCH_BIN} --site "${SITE_NAME}" migrate
 fi
 
-if [ ! -f "${BENCH_DIR}/sites/assets/assets.json" ]; then
+if [ ! -f "${BENCH_DIR}/sites/assets/assets.json" ] \
+  || ! compgen -G "${BENCH_DIR}/sites/assets/erpnext/dist/css/erpnext-web.bundle*.css" > /dev/null \
+  || ! compgen -G "${BENCH_DIR}/sites/assets/frappe/dist/js/frappe-web.bundle*.js" > /dev/null; then
   ${BENCH_BIN} build --production
 fi
 
