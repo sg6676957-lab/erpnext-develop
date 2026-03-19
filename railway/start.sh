@@ -22,6 +22,7 @@ DB_PORT="${DB_PORT:-3306}"
 DB_ROOT_USER="${DB_ROOT_USER:-root}"
 DB_ROOT_PW="${DB_ROOT_PW:-${MYSQL_ROOT_PASSWORD:-}}"
 SOCKETIO_PORT="${SOCKETIO_PORT:-9000}"
+GUNICORN_PORT="${GUNICORN_PORT:-8000}"
 FRAPPE_REDIS_CACHE="${FRAPPE_REDIS_CACHE:-redis://127.0.0.1:6379}"
 FRAPPE_REDIS_QUEUE="${FRAPPE_REDIS_QUEUE:-redis://127.0.0.1:6379}"
 FRAPPE_REDIS_SOCKETIO="${FRAPPE_REDIS_SOCKETIO:-${FRAPPE_REDIS_QUEUE}}"
@@ -55,17 +56,26 @@ if [ ! -f "${BENCH_DIR}/sites/${SITE_NAME}/site_config.json" ]; then
   ${BENCH_BIN} --site "${SITE_NAME}" migrate
 fi
 
+if [ ! -f "${BENCH_DIR}/sites/assets/assets.json" ]; then
+  ${BENCH_BIN} build --production
+fi
+
 node "${BENCH_DIR}/apps/frappe/socketio.js" &
 ${BENCH_BIN} worker --queue long,default,short &
 ${BENCH_BIN} schedule &
 
-exec "${BENCH_DIR}/env/bin/gunicorn" \
+export BACKEND="127.0.0.1:${GUNICORN_PORT}"
+export SOCKETIO="127.0.0.1:${SOCKETIO_PORT}"
+
+"${BENCH_DIR}/env/bin/gunicorn" \
   --chdir="${BENCH_DIR}/sites" \
-  --bind="0.0.0.0:${PORT:-8000}" \
+  --bind="0.0.0.0:${GUNICORN_PORT}" \
   --threads=4 \
   --workers=2 \
   --worker-class=gthread \
   --worker-tmp-dir=/dev/shm \
   --timeout=120 \
   --preload \
-  frappe.app:application
+  frappe.app:application &
+
+exec /usr/local/bin/nginx-entrypoint.sh
