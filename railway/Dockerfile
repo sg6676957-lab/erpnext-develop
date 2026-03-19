@@ -137,10 +137,4 @@ COPY --from=builder --chown=frappe:frappe /home/frappe/frappe-bench /home/frappe
 
 WORKDIR /home/frappe/frappe-bench
 
-VOLUME [ \
-  "/home/frappe/frappe-bench/sites", \
-  "/home/frappe/frappe-bench/sites/assets", \
-  "/home/frappe/frappe-bench/logs" \
-]
-
 CMD [ "/usr/local/bin/railway-start.sh" ]
