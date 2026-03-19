@@ -2,7 +2,16 @@
 set -euo pipefail
 
 BENCH_DIR="/home/frappe/frappe-bench"
+export PATH="/home/frappe/.local/bin:${PATH}"
 BENCH_BIN="${BENCH_DIR}/env/bin/bench"
+if [ ! -x "${BENCH_BIN}" ]; then
+  if command -v bench >/dev/null 2>&1; then
+    BENCH_BIN="$(command -v bench)"
+  else
+    echo "bench executable not found; expected ${BENCH_DIR}/env/bin/bench or bench on PATH" >&2
+    exit 1
+  fi
+fi
 
 cd "${BENCH_DIR}"
 
