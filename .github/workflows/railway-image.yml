@@ -1,0 +1,52 @@
+name: Build and Publish Railway Image
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+    paths:
+      - "railway/**"
+      - "render/**"
+      - ".github/workflows/railway-image.yml"
+      - ".dockerignore"
+      - "erpnext/**"
+      - "hrms-develop/**"
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: railway/Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository }}:railway
+          build-args: |
+            FRAPPE_BRANCH=version-16
+            FRAPPE_PATH=https://github.com/frappe/frappe
+            ERPNext_REPO_NAME=erpnext-develop
+            HRMS_SUBDIR=hrms-develop/hrms
+            NODE_MAX_OLD_SPACE_SIZE=1024
+            ESBUILD_WORKER_COUNT=1
