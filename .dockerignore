@@ -1,0 +1,7 @@
+﻿**
+!railway/**
+!railway/Dockerfile
+!railway/apps.json
+!railway/resources/**
+!railway/railway.toml
+!railway/README-RAILWAY.md
